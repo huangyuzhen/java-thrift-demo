@@ -18,6 +18,7 @@
  */
 
 import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TNonblockingServerTransport;
@@ -28,32 +29,27 @@ import tutorial.*;
 import shared.*;
 
 public class JavaServer4 {
-
-  private static final int DEFAULT_PORT = 9092;
-  private static final int DEFAULT_WORKERS = 5;
-  private static final int DEFAULT_MAX_READ_BUFFER_BYTES = 16384000;
-
+  private static final int port = 9092;
   public static CalculatorHandler handler;
-
   public static Calculator.Processor processor;
 
-  public static void main(String[] origin_args) {
+  public static void main(String[] args) {
 
     try {
       handler = new CalculatorHandler();
       processor = new Calculator.Processor(handler);
 
-      TNonblockingServerTransport transport = new TNonblockingServerSocket(DEFAULT_PORT);
-      TNonblockingServer.Args args = new TNonblockingServer.Args(transport);
-      args.processor(processor);
-      args.transportFactory(new TFramedTransport.Factory());
-      args.protocolFactory(new TBinaryProtocol.Factory());
+      TNonblockingServerTransport transport = new TNonblockingServerSocket(port);
 
-      TNonblockingServer server = new TNonblockingServer(args);
+      TNonblockingServer.Args servArgs = new TNonblockingServer.Args(transport);
+      servArgs.processor(processor);
+      servArgs.transportFactory(new TFramedTransport.Factory());
+      servArgs.protocolFactory(new TBinaryProtocol.Factory());
 
+      TServer server = new TNonblockingServer(servArgs);
       System.out.println("Running TNonblockingServer Server");
-      server.serve();
 
+      server.serve();
     } catch (Exception x) {
       x.printStackTrace();
     }

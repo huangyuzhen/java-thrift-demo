@@ -18,43 +18,40 @@
  */
 
 import java.net.ServerSocket;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
-import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.layered.TFramedTransport;
-
 
 // Generated code
 import tutorial.*;
 import shared.*;
 
 public class JavaServer3 {
-
-  private static final int DEFAULT_PORT = 9090;
-  private static final int DEFAULT_WORKERS = 5;
-  private static final int DEFAULT_MAX_READ_BUFFER_BYTES = 16384000;
-
+  private static final int port = 9092;
   public static CalculatorHandler handler;
   public static Calculator.Processor processor;
 
-  public static void main(String[] origin_args) {
+  public static void main(String[] args) {
 
     try {
       handler = new CalculatorHandler();
       processor = new Calculator.Processor(handler);
 
-      ServerSocket socket = new ServerSocket(DEFAULT_PORT);
+      ServerSocket socket = new ServerSocket(port);
       TServerTransport transport = new TServerSocket(socket);
-      TBinaryProtocol.Factory protocolFactory = new TBinaryProtocol.Factory();
-      TThreadPoolServer.Args ttpsArgs = new TThreadPoolServer.Args(transport);
-      ttpsArgs.processor(processor);
-      ttpsArgs.protocolFactory(protocolFactory);
-      ttpsArgs.transportFactory(new TFramedTransport.Factory());
-      TThreadPoolServer server = new TThreadPoolServer(ttpsArgs);
-      System.out.println("Running ThreadPool Server");
-      server.serve();
 
+      TThreadPoolServer.Args servArgs = new TThreadPoolServer.Args(transport);
+      servArgs.processor(processor);
+      servArgs.transportFactory(new TFramedTransport.Factory());
+      servArgs.protocolFactory(new TBinaryProtocol.Factory());
+
+      TThreadPoolServer server = new TThreadPoolServer(servArgs);
+      System.out.println("Running TThreadPoolServer Server");
+
+      server.serve();
     } catch (Exception x) {
       x.printStackTrace();
     }

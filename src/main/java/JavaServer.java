@@ -33,9 +33,7 @@ import shared.*;
 import java.util.HashMap;
 
 public class JavaServer {
-
   public static CalculatorHandler handler;
-
   public static Calculator.Processor processor;
 
   public static void main(String [] args) {
