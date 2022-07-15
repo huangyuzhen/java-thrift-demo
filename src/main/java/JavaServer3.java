@@ -17,22 +17,24 @@
  * under the License.
  */
 
+import java.net.ServerSocket;
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.server.THsHaServer;
-import org.apache.thrift.transport.TNonblockingServerSocket;
-import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.layered.TFramedTransport;
+
 
 // Generated code
 import tutorial.*;
 import shared.*;
 
-public class JavaServer2 {
+public class JavaServer3 {
 
-  private static final int DEFAULT_PORT = 9092;
+  private static final int DEFAULT_PORT = 9090;
   private static final int DEFAULT_WORKERS = 5;
   private static final int DEFAULT_MAX_READ_BUFFER_BYTES = 16384000;
-  
+
   public static CalculatorHandler handler;
   public static Calculator.Processor processor;
 
@@ -42,17 +44,17 @@ public class JavaServer2 {
       handler = new CalculatorHandler();
       processor = new Calculator.Processor(handler);
 
-      TNonblockingServerTransport transport = new TNonblockingServerSocket(DEFAULT_PORT);
-      THsHaServer.Args args = new THsHaServer.Args(transport);
-      args.minWorkerThreads(DEFAULT_WORKERS);
-      args.maxWorkerThreads(DEFAULT_WORKERS);
-      args.processor(processor);
-      args.transportFactory(new TFramedTransport.Factory(DEFAULT_MAX_READ_BUFFER_BYTES));
-      args.protocolFactory(new TBinaryProtocol.Factory(false, false));
-      args.maxReadBufferBytes = DEFAULT_MAX_READ_BUFFER_BYTES;
-      THsHaServer server = new THsHaServer(args);
-
+      ServerSocket socket = new ServerSocket(DEFAULT_PORT);
+      TServerTransport transport = new TServerSocket(socket);
+      TBinaryProtocol.Factory protocolFactory = new TBinaryProtocol.Factory();
+      TThreadPoolServer.Args ttpsArgs = new TThreadPoolServer.Args(transport);
+      ttpsArgs.processor(processor);
+      ttpsArgs.protocolFactory(protocolFactory);
+      ttpsArgs.transportFactory(new TFramedTransport.Factory());
+      TThreadPoolServer server = new TThreadPoolServer(ttpsArgs);
+      System.out.println("Running ThreadPool Server");
       server.serve();
+
     } catch (Exception x) {
       x.printStackTrace();
     }

@@ -18,7 +18,7 @@
  */
 
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.server.THsHaServer;
+import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.layered.TFramedTransport;
@@ -27,13 +27,14 @@ import org.apache.thrift.transport.layered.TFramedTransport;
 import tutorial.*;
 import shared.*;
 
-public class JavaServer2 {
+public class JavaServer4 {
 
   private static final int DEFAULT_PORT = 9092;
   private static final int DEFAULT_WORKERS = 5;
   private static final int DEFAULT_MAX_READ_BUFFER_BYTES = 16384000;
-  
+
   public static CalculatorHandler handler;
+
   public static Calculator.Processor processor;
 
   public static void main(String[] origin_args) {
@@ -43,16 +44,16 @@ public class JavaServer2 {
       processor = new Calculator.Processor(handler);
 
       TNonblockingServerTransport transport = new TNonblockingServerSocket(DEFAULT_PORT);
-      THsHaServer.Args args = new THsHaServer.Args(transport);
-      args.minWorkerThreads(DEFAULT_WORKERS);
-      args.maxWorkerThreads(DEFAULT_WORKERS);
+      TNonblockingServer.Args args = new TNonblockingServer.Args(transport);
       args.processor(processor);
-      args.transportFactory(new TFramedTransport.Factory(DEFAULT_MAX_READ_BUFFER_BYTES));
-      args.protocolFactory(new TBinaryProtocol.Factory(false, false));
-      args.maxReadBufferBytes = DEFAULT_MAX_READ_BUFFER_BYTES;
-      THsHaServer server = new THsHaServer(args);
+      args.transportFactory(new TFramedTransport.Factory());
+      args.protocolFactory(new TBinaryProtocol.Factory());
 
+      TNonblockingServer server = new TNonblockingServer(args);
+
+      System.out.println("Running TNonblockingServer Server");
       server.serve();
+
     } catch (Exception x) {
       x.printStackTrace();
     }
